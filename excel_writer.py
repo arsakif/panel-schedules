@@ -6,6 +6,26 @@ Format: Concatenated header in first column, circuits below, 2 empty rows betwee
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 from typing import List, Dict, Any
+import re
+
+
+def clean_ocp_size(ocp_value: str) -> str:
+    """
+    Extract just the numeric value from OCP size.
+    Examples: "20A" -> "20", "60.00A" -> "60", "30 Amps" -> "30"
+    """
+    if not ocp_value:
+        return ""
+    # Extract number from string
+    match = re.search(r'(\d+(?:\.\d+)?)', ocp_value)
+    if match:
+        number = float(match.group(1))
+        # Remove .00 decimals if present
+        if number == int(number):
+            return str(int(number))
+        else:
+            return str(number)
+    return ocp_value  # Return original if no number found
 
 
 class ExcelWriter:
@@ -78,7 +98,7 @@ class ExcelWriter:
             for circuit in circuits:
                 self.sheet.cell(row=self.current_row, column=1, value=circuit.get("circuit_number", ""))
                 self.sheet.cell(row=self.current_row, column=2, value=circuit.get("load_description", ""))
-                self.sheet.cell(row=self.current_row, column=3, value=circuit.get("ocp_size", ""))
+                self.sheet.cell(row=self.current_row, column=3, value=clean_ocp_size(circuit.get("ocp_size", "")))
                 self.sheet.cell(row=self.current_row, column=4, value=circuit.get("poles", ""))
                 self.sheet.cell(row=self.current_row, column=5, value=circuit.get("feeder", ""))
                 self.current_row += 1

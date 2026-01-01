@@ -5,7 +5,7 @@ Main script for extracting panel schedule data from images using Google Gemini A
 from PIL import Image
 from panel_extractor import PanelExtractor
 from excel_writer import ExcelWriter
-from csv_writer import PanelHeadersCSVWriter, PanelCircuitsCSVWriter
+from csv_writer import PanelHeadersCSVWriter, PanelCircuitsCSVWriter, CombinedCSVWriter
 from paths import get_output_path, get_input_images
 
 
@@ -32,13 +32,16 @@ def process_images():
     extractor = PanelExtractor()
     headers_csv_path = get_output_path("panel_headers.csv")
     circuits_csv_path = get_output_path("panel_circuits.csv")
+    combined_csv_path = get_output_path("panel_schedules_combined.csv")
     headers_writer = PanelHeadersCSVWriter(headers_csv_path)
     circuits_writer = PanelCircuitsCSVWriter(circuits_csv_path)
+    combined_writer = CombinedCSVWriter(combined_csv_path)
     all_panels = []
     
     print(f"Writing results to:")
     print(f"  - {headers_csv_path}")
     print(f"  - {circuits_csv_path}")
+    print(f"  - {combined_csv_path}")
     print("(Each panel will be saved immediately after processing)\n")
     
     # Process each image
@@ -49,10 +52,11 @@ def process_images():
             
             panels = extractor.extract_from_image(image, image_name)
             
-            # Write each panel to both CSV files immediately
+            # Write each panel to all three CSV files immediately
             for panel in panels:
                 headers_writer.write_panel_header(panel, image_name)
                 circuits_writer.write_circuits(panel, image_name)
+                combined_writer.write_panel(panel, image_name)
             
             all_panels.extend(panels)
             print(f"  → Progress: {idx}/{len(image_files)} images processed")
@@ -73,9 +77,10 @@ def process_images():
         writer.save()
         
         print(f"\n✓ Successfully created:")
-        print(f"  Panel Headers CSV: {headers_csv_path}")
-        print(f"  Circuits CSV:      {circuits_csv_path}")
-        print(f"  Excel:             {excel_output_path}")
+        print(f"  Panel Headers CSV:   {headers_csv_path}")
+        print(f"  Circuits CSV:        {circuits_csv_path}")
+        print(f"  Combined CSV:        {combined_csv_path}")
+        print(f"  Excel:               {excel_output_path}")
         print(f"  Total panels extracted: {len(all_panels)}")
         print("="*60 + "\n")
     else:
