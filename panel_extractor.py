@@ -26,7 +26,7 @@ class PanelExtractor:
             image_name: Name of the image file for logging
             
         Returns:
-            List of panel dictionaries with extracted data
+            List containing one panel dictionary with extracted data
         """
         try:
             print(f"\nProcessing: {image_name}")
@@ -52,22 +52,48 @@ class PanelExtractor:
             
             response_text = response_text.strip()
             
-            # Parse JSON response
-            data = json.loads(response_text)
-            panels = data.get("panels", [])
+            # Parse the two separate JSON structures
+            # Expected format:
+            # PANEL_HEADER:
+            # {json}
+            # CIRCUITS:
+            # [{json}]
             
-            if panels:
-                panel_names = [p.get("panel_header", {}).get("panel_name", "Unknown") for p in panels]
-                print(f"  ✓ Extracted {len(panels)} panel(s): {', '.join(panel_names)}")
+            panel_header = {}
+            circuits = []
+            
+            if "PANEL_HEADER:" in response_text and "CIRCUITS:" in response_text:
+                # Split at CIRCUITS: marker
+                parts = response_text.split("CIRCUITS:")
+                
+                # Extract panel header JSON (after PANEL_HEADER:)
+                header_part = parts[0].replace("PANEL_HEADER:", "").strip()
+                panel_header = json.loads(header_part)
+                
+                # Extract circuits JSON array
+                circuits_part = parts[1].strip()
+                circuits = json.loads(circuits_part)
             else:
-                print(f"  - No panels found in this image")
+                print(f"  ✗ Response format incorrect - missing PANEL_HEADER: or CIRCUITS: labels")
+                print(f"    First 300 chars: {response_text[:300]}")
+                return []
             
-            return panels
+            # Construct panel dictionary
+            panel = {
+                "panel_header": panel_header,
+                "circuits": circuits if isinstance(circuits, list) else []
+            }
+            
+            panel_name = panel_header.get("panel_name", "Unknown")
+            circuit_count = len(circuits) if isinstance(circuits, list) else 0
+            print(f"  ✓ Extracted panel: {panel_name} ({circuit_count} circuits)")
+            
+            return [panel]
             
         except json.JSONDecodeError as e:
             print(f"  ✗ Error parsing JSON response: {e}")
             if 'response_text' in locals():
-                print(f"    First 200 chars: {response_text[:200]}")
+                print(f"    First 300 chars: {response_text[:300]}")
             return []
         except Exception as e:
             print(f"  ✗ Error extracting data: {e}")
