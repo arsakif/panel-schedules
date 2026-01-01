@@ -5,6 +5,7 @@ Main script for extracting panel schedule data from images using Google Gemini A
 from PIL import Image
 from panel_extractor import PanelExtractor
 from excel_writer import ExcelWriter
+from csv_writer import CSVWriter
 from paths import get_output_path, get_input_images
 
 
@@ -27,35 +28,47 @@ def process_images():
     
     print(f"\n✓ Found {len(image_files)} image(s) to process\n")
     
-    # Initialize extractor
+    # Initialize extractor and CSV writer
     extractor = PanelExtractor()
+    csv_output_path = get_output_path("panel_schedules.csv")
+    csv_writer = CSVWriter(csv_output_path)
     all_panels = []
     
+    print(f"Writing results to: {csv_output_path}")
+    print("(Each panel will be saved immediately after processing)\n")
+    
     # Process each image
-    for image_path in image_files:
+    for idx, image_path in enumerate(image_files, 1):
         try:
             image = Image.open(image_path)
             image_name = image_path.split('/')[-1]
             
             panels = extractor.extract_from_image(image, image_name)
+            
+            # Write each panel to CSV immediately
+            for panel in panels:
+                csv_writer.write_panel(panel, image_name)
+            
             all_panels.extend(panels)
+            print(f"  → Progress: {idx}/{len(image_files)} images processed")
             
         except Exception as e:
             print(f"  ✗ Error loading {image_path}: {e}")
     
-    # Generate Excel output
+    # Generate Excel output at the end
     if all_panels:
         print("\n" + "="*60)
         print(f"GENERATING EXCEL OUTPUT")
         print("="*60)
         
-        output_filename = "panel_schedules.xlsx"
-        output_path = get_output_path(output_filename)
+        excel_output_path = get_output_path("panel_schedules.xlsx")
         
         writer = ExcelWriter()
-        writer.create_workbook(all_panels, output_path)
+        writer.create_workbook(all_panels, excel_output_path)
         
-        print(f"\n✓ Successfully created: {output_path}")
+        print(f"\n✓ Successfully created:")
+        print(f"  CSV:   {csv_output_path}")
+        print(f"  Excel: {excel_output_path}")
         print(f"  Total panels extracted: {len(all_panels)}")
         print("="*60 + "\n")
     else:
