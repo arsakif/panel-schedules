@@ -6,7 +6,7 @@ from google import genai
 from config import GOOGLE_API_KEY
 
 # Gemini model to use
-MODEL_NAME = "gemini-3-pro-preview"
+MODEL_NAME = "gemini-3-flash-preview"
 
 # Generation configuration
 GENERATION_CONFIG = {
