@@ -1,61 +1,34 @@
 """
-Directory paths configuration for input and output files.
+Path management for panel schedule extraction project.
 """
 
 import os
 
-# Get the project root directory
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+# Base directories
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+INPUT_DIR = os.path.join(BASE_DIR, "panel_schedule_images")
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
 
-# Input directory for PDF files
-INPUT_DIR = os.path.join(PROJECT_ROOT, "drawings")
-
-# Output directory for Excel files
-OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
-
-# Debug directory for saving extracted images
-DEBUG_DIR = os.path.join(PROJECT_ROOT, "debug_images")
-
-# Create directories if they don't exist
+# Ensure directories exist
 os.makedirs(INPUT_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(DEBUG_DIR, exist_ok=True)
-
-
-def get_input_path(filename: str) -> str:
-    """
-    Get full path for an input file.
-    
-    Args:
-        filename: Name of the input file
-        
-    Returns:
-        Full path to the input file
-    """
-    return os.path.join(INPUT_DIR, filename)
 
 
 def get_output_path(filename: str) -> str:
-    """
-    Get full path for an output file.
-    
-    Args:
-        filename: Name of the output file
-        
-    Returns:
-        Full path to the output file
-    """
+    """Get full path for output file."""
     return os.path.join(OUTPUT_DIR, filename)
 
 
-def get_debug_path(filename: str) -> str:
-    """
-    Get full path for a debug file.
+def get_input_images():
+    """Get list of all image files in the input directory."""
+    image_extensions = {'.png', '.jpg', '.jpeg', '.bmp', '.tiff'}
+    images = []
     
-    Args:
-        filename: Name of the debug file
-        
-    Returns:
-        Full path to the debug file
-    """
-    return os.path.join(DEBUG_DIR, filename)
+    if not os.path.exists(INPUT_DIR):
+        return images
+    
+    for filename in sorted(os.listdir(INPUT_DIR)):
+        if any(filename.lower().endswith(ext) for ext in image_extensions):
+            images.append(os.path.join(INPUT_DIR, filename))
+    
+    return images
