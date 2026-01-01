@@ -214,26 +214,31 @@ class CombinedCSVWriter:
                 header_parts.append(header['enclosure'])
             
             panel_description = " | ".join(header_parts)
+            panel_name = header.get('panel_name', '')
             
-            # Write concatenated panel header in first column
-            writer.writerow([panel_description])
+            # Write concatenated panel header in first column (with 3 columns before it)
+            writer.writerow(['', '', '1', panel_description])
             
-            # Write circuit column headers
-            writer.writerow(['Load Description', 'OCP Size', 'Poles', 'Feeder', 'Circuit Number'])
+            # Write circuit column headers (with 3 columns before: empty, panel name header, empty)
+            writer.writerow(['', 'Panel Name', '2', 'Load Description', 'Quantity', 'OCP', 'Poles', 'Feeder', 'Ckt#'])
             
             # Write each circuit
             circuits = panel.get('circuits', [])
             if circuits:
                 for circuit in circuits:
                     writer.writerow([
+                        '',  # Empty column
+                        panel_name,  # Panel name for circuit rows
+                        '',  # Empty column
                         circuit.get('load_description', ''),
+                        '1',  # Quantity
                         clean_ocp_size(circuit.get('ocp_size', '')),
                         circuit.get('poles', ''),
                         circuit.get('feeder', ''),
                         circuit.get('circuit_number', '')
                     ])
             else:
-                writer.writerow(['NO CIRCUITS FOUND'])
+                writer.writerow(['', panel_name, '', 'NO CIRCUITS FOUND'])
             
             # Add 2 empty rows between panels
             writer.writerow([])

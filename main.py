@@ -2,6 +2,7 @@
 Main script for extracting panel schedule data from images using Google Gemini API.
 """
 
+import os
 from PIL import Image
 from panel_extractor import PanelExtractor
 from excel_writer import ExcelWriter
@@ -27,6 +28,17 @@ def process_images():
         return
     
     print(f"\n✓ Found {len(image_files)} image(s) to process\n")
+    
+    # Clear existing output files
+    output_files = [
+        get_output_path("panel_headers.csv"),
+        get_output_path("panel_circuits.csv"),
+        get_output_path("panel_schedules_combined.csv"),
+        get_output_path("panel_schedules.xlsx")
+    ]
+    for file_path in output_files:
+        if os.path.exists(file_path):
+            os.remove(file_path)
     
     # Initialize extractor and CSV writers
     extractor = PanelExtractor()
