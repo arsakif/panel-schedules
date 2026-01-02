@@ -4,10 +4,41 @@ Module for extracting electrical panel schedule data from images using Google Ge
 
 from PIL import Image
 import json
+import re
 from typing import List, Dict, Any
 from api_config import get_gemini_model
 from prompts import PANEL_EXTRACTION_PROMPT
 import api_config
+
+
+def normalize_phase_wire(value: str, field_type: str) -> str:
+    """
+    Normalize phase and wire values to standard format.
+    
+    Args:
+        value: Raw value from extraction (e.g., "3", "3Ph", "3ph", "3 phase")
+        field_type: Either "phase" or "wire"
+        
+    Returns:
+        Normalized string (e.g., "3ph" for phase, "4w" for wire)
+    """
+    if not value:
+        return ""
+    
+    # Extract just the number
+    match = re.search(r'(\d+)', str(value))
+    if not match:
+        return value  # Return as-is if no number found
+    
+    number = match.group(1)
+    
+    # Return formatted value
+    if field_type == "phase":
+        return f"{number}ph"
+    elif field_type == "wire":
+        return f"{number}w"
+    else:
+        return value
 
 
 class PanelExtractor:
@@ -69,6 +100,12 @@ class PanelExtractor:
                 # Extract panel header JSON (after PANEL_HEADER:)
                 header_part = parts[0].replace("PANEL_HEADER:", "").strip()
                 panel_header = json.loads(header_part)
+                
+                # Normalize phase and wire formats
+                if "phase" in panel_header:
+                    panel_header["phase"] = normalize_phase_wire(panel_header["phase"], "phase")
+                if "wire" in panel_header:
+                    panel_header["wire"] = normalize_phase_wire(panel_header["wire"], "wire")
                 
                 # Extract circuits JSON array
                 circuits_part = parts[1].strip()

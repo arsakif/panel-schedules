@@ -12,11 +12,11 @@ For the panel schedule in this image, extract:
 2- Panel Amperage of Lugs and Bus: The bus amperage rating (e.g., "400A", "225A")
 3- Panel Amperage of Main OCPD: Main circuit breaker or fuse rating if exists (e.g., "400A MCB", "200A MB"). If panel is MLO (Main Lugs Only), leave empty ""
 4- Panel Voltages: System voltage (e.g., "120/208V", "277/480V", "480Y/277")
-5- Panel Phases: Number of phases (e.g., "1Ph", "3Ph", "1", "3")
-6- Panel Wire: Wire configuration (e.g., "2W", "3W", "4W")
-  * 2W = phase and neutral
-  * 3W = either 3 phase only OR 2 phase + 1 neutral
-  * 4W = 3 phase + 1 neutral
+5- Panel Phases: Number of phases ALWAYS format as number+"ph" (e.g., "1ph", "2ph", "3ph")
+6- Panel Wire: Wire configuration ALWAYS format as number+"w" (e.g., "2w", "3w", "4w")
+  * 2w = phase and neutral
+  * 3w = either 3 phase only OR 2 phase + 1 neutral
+  * 4w = 3 phase + 1 neutral
 7- Panel Pole(Circuit)#: Number of poles/circuits (e.g., "42", "60 poles"). For switchboards without pole designation, leave empty ""
 8- Panel Short Circuit Rating (KAIC): Short circuit rating (e.g., "22KAIC", "65,000", "100KAIC", "10,000AIC")
 9- Panel Enclosure Type: Enclosure type (e.g., "NEMA1", "NEMA3R", "Type 1", "NEMA4X")

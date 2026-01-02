@@ -237,6 +237,11 @@ class ExcelWriter:
     def save(self) -> None:
         """Save the Excel workbook to file."""
         self.adjust_column_widths()
+        
+        # Turn off gridlines for better appearance
+        self.sheet.sheet_view.showGridLines = False
+        
         self.workbook.save(self.filename)
         print(f"Excel file saved: {self.filename}")
+
 
